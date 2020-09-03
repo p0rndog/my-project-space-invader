@@ -2,7 +2,8 @@
     "name": "my project (space bots in space)",
     "description": "",
     "dependencies": {
-        "device": "*"
+        "device": "*",
+        "animation": "*"
     },
     "files": [
         "main.blocks",
