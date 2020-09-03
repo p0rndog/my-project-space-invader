@@ -1,96 +1,88 @@
 namespace SpriteKind {
     export const spacerock = SpriteKind.create()
+    export const coin = SpriteKind.create()
 }
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Projectile, function (sprite, otherSprite) {
-    game.over(false)
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (cat.vy == 0) {
+        cat.vy = -150
+    }
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.spacerock, function (sprite, otherSprite) {
+scene.onOverlapTile(SpriteKind.Player, myTiles.tile8, function (sprite, location) {
+    game.over(true)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.coin, function (sprite, otherSprite) {
+    info.changeScoreBy(1)
     otherSprite.destroy()
-    info.changeScoreBy(1)
-    if (Math.percentChance(50)) {
-        sprite.say("pog", 500)
-    }
 })
-function addScore () {
-    space_rock_spawn_time = Math.max(1000, space_rock_spawn_time - 50)
-    info.changeScoreBy(1)
-    if (info.score() % 10 == 10) {
-        info.startCountdown(countdown_time)
-    }
-}
-let blackhole: Sprite = null
-let survivor: Sprite = null
-let space_rock_spawn_time = 0
-let countdown_time = 0
-effects.starField.startScreenEffect()
-countdown_time = 20
-let spaceship = sprites.create(img`
-    . . . . . e e e e e e . . . . . 
-    . . . . e 2 2 2 2 2 2 e . . . . 
-    . . . . c 2 2 2 2 2 2 c 2 . . . 
-    . . e 2 c 4 2 2 2 2 2 c 2 e . . 
-    . . 1 2 2 4 2 2 2 2 2 c 2 1 . . 
-    . 2 1 2 2 4 2 2 2 2 2 2 2 1 2 . 
-    2 3 1 2 2 4 2 2 2 2 2 2 2 1 3 2 
-    2 3 1 2 c 2 4 4 2 2 2 c 2 1 3 2 
-    2 3 e 2 c e c c c c e c 2 e 3 2 
-    2 3 e 2 e c b b b b c e 2 e 3 2 
-    2 3 e 2 e b b b b b b e 2 e 3 2 
-    2 2 e e e e e e e e e e e e 2 2 
-    2 . 1 e 3 e e e e e e 3 e 1 . 2 
-    . . 1 e 2 3 e e e e 3 2 e 1 . . 
-    . . 1 1 e e e e e e e e 1 1 . . 
-    . . . 1 1 . . . . . . 1 1 . . . 
+scene.onOverlapTile(SpriteKind.Player, myTiles.tile7, function (sprite, location) {
+    game.over(false, effects.melt)
+})
+let coin: Sprite = null
+let cat: Sprite = null
+scene.setBackgroundColor(9)
+cat = sprites.create(img`
+    .....................
+    .....................
+    .....................
+    .....................
+    .....................
+    .....................
+    .d.............ff....
+    .f.............ffff..
+    .ff............fff5f.
+    ..ffffffffffffffffff.
+    ...ffffdddddffffff...
+    ...fffdddddddffff....
+    ...f.f.......f.f.....
+    ...f.f.......f.f.....
+    .....................
+    .....................
+    .....................
+    .....................
+    .....................
+    .....................
+    .....................
     `, SpriteKind.Player)
-spaceship.bottom = scene.screenHeight()
-controller.moveSprite(spaceship)
-spaceship.setFlag(SpriteFlag.StayInScreen, true)
-spaceship.z = 10
-info.setScore(0)
-info.startCountdown(countdown_time)
-space_rock_spawn_time = 2000
-game.onUpdateInterval(1000, function () {
-    survivor = sprites.createProjectileFromSide(img`
+controller.moveSprite(cat, 100, 0)
+tiles.setTilemap(tiles.createTilemap(hex`230010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000020202020200000000000000000000000004000000000000000000000000000000000000000000000000000000000000020202020200000000000000000000000004000200000000000000020202020202020200000000000004000000000000000000000200000000000000000000000000000000000000000000000202020000000000040200000000000400000000000000000000000000000000000000000000020000000002000000000000040000000000000000000000000000000000000000000000000002020000000000000003000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101010101010101010101010101010101010101010101010101010101010101010101`, img`
+    ...................................
+    ...................................
+    ...................................
+    ...................................
+    22222..............................
+    .............22222..............2..
+    .....22222222.................2....
+    ...................222......2......
+    ......................2....2.......
+    .........................22........
+    ..................................2
+    ...................................
+    ...................................
+    ...................................
+    ...................................
+    ...................................
+    `, [myTiles.transparency16,myTiles.tile7,myTiles.tile3,myTiles.tile8,myTiles.tile9], TileScale.Sixteen))
+scene.cameraFollowSprite(cat)
+cat.ay = 350
+for (let value of tiles.getTilesByType(myTiles.tile9)) {
+    coin = sprites.create(img`
         . . . . . . . . . . . . . . . . 
-        . . . . . 1 1 1 1 1 . . . . . . 
-        . . . . . 1 6 f 6 1 . . . . . . 
-        . . . . . 1 f f f 1 . . . . . . 
-        . . . . . 1 f f f 1 . . . . . . 
-        . . . . . 1 1 1 1 1 . . . . . . 
-        . . . . . . . 1 . . . . . . . . 
-        . . . . . . 1 1 1 . . . . . . . 
-        . . . . . 1 . 1 . 1 . . . . . . 
-        . . . . . 1 . 1 . 1 . . . . . . 
-        . . . . . 1 . 1 . 1 . . . . . . 
-        . . . . . . . 1 . . . . . . . . 
-        . . . . . . 1 . 1 . . . . . . . 
-        . . . . . 1 . . . 1 . . . . . . 
-        . . . . . 1 . . . 1 . . . . . . 
-        . . . . . 1 . . . 1 . . . . . . 
-        `, 0, 100)
-    survivor.left = randint(0, scene.screenWidth() - survivor.width)
-    survivor.setKind(SpriteKind.spacerock)
-})
-forever(function () {
-    pause(space_rock_spawn_time)
-    blackhole = sprites.createProjectileFromSide(img`
         . . . . . . . . . . . . . . . . 
-        . . . . f c f f c c c . . . . . 
-        . . c c f f f f f f f f f . . . 
-        . f f f f f f f f f f f f c . . 
-        . f f f f f f f f f f f f c . . 
-        c f f f f f f f f f f f f f c . 
-        f f f f f f f f f f f f f f f . 
-        c f f f f f f f f f f f f f c . 
-        c f f f f f f f f f f f f f c . 
-        c f f f f f f f f f f f f f f . 
-        f f f f f f f f f f f f f f c . 
-        c f f f f f f f f f f f f f c . 
-        . f f f f f f f f f f f f f . . 
-        . f f f f f f f f f f f f f . . 
-        . . c f f f f f f f f c c . . . 
-        . . . . f f f c c f f . . . . . 
-        `, 0, 50)
-    blackhole.left = randint(0, scene.screenWidth() - blackhole.width)
-    survivor.setKind(SpriteKind.spacerock)
-})
+        . . . . f f f f f f f . . . . . 
+        . . . f 5 5 5 5 5 5 5 f . . . . 
+        . . f 5 5 5 5 4 4 4 5 5 f . . . 
+        . f 5 5 4 5 5 5 5 5 4 5 5 f . . 
+        . f 5 5 4 5 5 5 5 5 4 5 5 f . . 
+        . f 5 5 4 5 5 5 5 5 4 5 5 f . . 
+        . f 5 5 5 5 5 5 5 5 5 5 5 f . . 
+        . f 5 5 5 5 5 5 5 5 5 5 5 f . . 
+        . f 5 5 4 5 5 5 5 5 5 5 5 f . . 
+        . f 5 5 4 4 5 5 5 5 5 5 5 f . . 
+        . . f 5 5 4 4 5 5 5 5 5 f . . . 
+        . . . f 5 5 5 5 5 5 5 f . . . . 
+        . . . . f f f f f f f . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.coin)
+    tiles.placeOnTile(coin, value)
+    tiles.setTileAt(value, myTiles.transparency16)
+}
